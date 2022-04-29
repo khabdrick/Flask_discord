@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dashboard</title>
+</head>
+<body>
+  <h3>Hello, {{user.name}}! Please select a server to get started</h3>
+
+<h2> The Bot is in: {{guild_count}} servers </h2>
+
+<h3> Common guilds </h3>
+
+<ul>
+{% for guild in matching %}
+<img src="{{guild.icon_url}}"  />
+  <li>{{ guild.name }}</li>
+  <br><br>
+{% endfor %}
+</ul>
+
+</body>
+</html>
