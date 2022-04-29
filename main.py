@@ -1,9 +1,17 @@
-from flask import Flask, render_template, request, session, redirect, url_for
-from flask_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
+from quart import Quart, render_template, request, session, redirect, url_for
+from quart_discord import DiscordOAuth2Session, requires_authorization, Unauthorized
 from discord.ext import ipc
+import os
+
+os.environ[
+    "OAUTHLIB_INSECURE_TRANSPORT"
+] = "1"  # this is required because OAuth 2 utilizes https.
 
 
-app = Flask(__name__)
+app = Quart(__name__)
+ipc_client = ipc.Client(
+    secret_key="this_is_token"
+)  # secret_key must be the same as your IPC server
 app.config["SECRET_KEY"] = "test123"
 
 app.config["DISCORD_CLIENT_ID"] = 969522874446671953  # Discord client ID.
@@ -13,30 +21,39 @@ app.config[
 app.config[
     "DISCORD_REDIRECT_URI"
 ] = "http://127.0.0.1:5000/callback"  # URL to your callback endpoint.
-app.config["DISCORD_BOT_TOKEN"] = ""  # Required to access BOT resources.
+
 
 discord = DiscordOAuth2Session(app)
 
-ipc_client = ipc.Client(secret_key="Swas")
-
 
 @app.route("/")
-def home():
-    return render_template("index.html")
+async def home():
+    return await render_template("home.html", authorized=await discord.authorized)
 
 
 @app.route("/login")
-def login():
-    return discord.create_session()
+async def login():
+    return await discord.create_session()
+
+
+@app.route("/callback")
+async def callback():
+    try:
+        await discord.callback()
+    except Exception:
+        pass
+
+    return redirect(url_for("dashboard"))
 
 
 @app.route("/dashboard")
-def dashboard():
-    guild_count = ipc_client.request("get_guild_count")
-    guild_ids = ipc_client.request("get_guild_ids")
+async def dashboard():
+    guild_count = await ipc_client.request("get_guild_count")
+    guild_ids = await ipc_client.request("get_guild_ids")
+    user = await discord.fetch_user()
 
     try:
-        user_guilds = discord.fetch_guilds()
+        user_guilds = await discord.fetch_guilds()
     except:
         return redirect(url_for("login"))
 
@@ -46,8 +63,8 @@ def dashboard():
         if guild.id in guild_ids:
             same_guilds.append(guild)
 
-    return render_template(
-        "dashboard.html", guild_count=guild_count, matching=same_guilds
+    return await render_template(
+        "dashboard.html", guild_count=guild_count, matching=same_guilds, user=user
     )
 
 
