@@ -21,7 +21,7 @@ class MyBot(commands.Bot):
         print(endpoint, "raised", error)
 
 
-my_bot = MyBot(command_prefix=">", intents=discord.Intents.default())
+my_bot = MyBot(command_prefix="$", intents=discord.Intents.default())
 
 
 @my_bot.ipc.route()
@@ -38,8 +38,8 @@ async def get_guild_ids(data):
 
 
 @my_bot.command()
-async def hi(ctx):
-    await ctx.send("Hi")
+async def hello(ctx):
+    await ctx.send("Hello there!")
 
 
 my_bot.ipc.start()
