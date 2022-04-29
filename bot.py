@@ -6,7 +6,7 @@ class MyBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.ipc = ipc.Server(self, secret_key="Swas")
+        self.ipc = ipc.Server(self, secret_key="this_is_token")
 
     async def on_ready(self):
         """Called upon the READY event"""
@@ -43,4 +43,4 @@ async def hi(ctx):
 
 
 my_bot.ipc.start()
-my_bot.run(TOKEN)
+my_bot.run("OTY5NTIyODc0NDQ2NjcxOTUz.Ymuoig.OMsQ8sCsk5pY1cJSdn5yyDB8Bhc")
